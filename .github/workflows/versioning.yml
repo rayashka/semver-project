@@ -1,0 +1,29 @@
+name: Semantic Versioning
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  version-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Check commit messages for version impact
+      run: |
+        echo "Analyzing commit messages for version impact..."
+        if git log --oneline -1 | grep -q "feat:"; then
+          echo "MINOR version bump required"
+          echo "VERSION_BUMP=minor" >> $GITHUB_ENV
+        elif git log --oneline -1 | grep -q "fix:"; then
+          echo "PATCH version bump required" 
+          echo "VERSION_BUMP=patch" >> $GITHUB_ENV
+        elif git log --oneline -1 | grep -q "BREAKING CHANGE:"; then
+          echo "MAJOR version bump required"
+          echo "VERSION_BUMP=major" >> $GITHUB_ENV
+        else
+          echo "No version bump required"
+          echo "VERSION_BUMP=none" >> $GITHUB_ENV
+        fi
